@@ -572,7 +572,7 @@ class CommandLineParser(object):
     def put(self):
         paths = self.args.dir
         dst = self.args.single_arg
-        result = self.client.put(paths, dst)
+        result = self.client.copyFromLocal(paths, dst)
         for line in format_results(result, json_output=self.args.json):
             print line
 
