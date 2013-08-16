@@ -975,19 +975,22 @@ class Client(object):
                 data_xciever = DataXceiverChannel(host, port)
                 if data_xciever.connect():
                     data_xciever.writeBlock(length, pool_id, block.b.blockId, block.b.generationStamp, packet_offset)
-
+                    
                     # Issue a CompleteRequest
-                    # Problem: before you can close, all the file's blocks need to be replicated
                     request = client_proto.CompleteRequestProto()
                     request.src = path
                     request.clientName = "snakebite"
 
-                    #while response.result == False:
                     response = self.service.complete(request)
+                    for _ in range(100):
+                        if response.result == False:
+                            response = self.service.complete(request)
 
-        if response.result == False: # Remove unfinished file for now
-            self.delete([path]).next()
-        return response.result
+                    '''                    
+                    if response.result == False: # Remove unfinished file for now, while experimenting
+                        self.delete([path]).next()
+                    '''
+                    return response.result
 
     def _read_file(self, path, node, tail_only, check_crc):
         length = node.length
